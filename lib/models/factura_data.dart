@@ -102,8 +102,8 @@ class FacturaData {
       '03': 'BOLETA DE VENTA',
       '07': 'NOTA DE CREDITO',
       '08': 'NOTA DE DEBITO',
-      '09': 'GUÍA DE REMISION',
-      '10': 'RECIBO POR HONORARIOS',
+      '10': 'RECIBO POR HONORARIO',
+      '11': 'OTROS',
     };
     return tipos[codigo] ?? 'COMPROBANTE ($codigo)';
   }

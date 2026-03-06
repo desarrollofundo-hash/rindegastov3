@@ -143,8 +143,8 @@ class _NuevoGastoModalState extends State<NuevoGastoModal>
     'BOLETA DE VENTA',
     'NOTA DE CREDITO',
     'NOTA DE DEBITO',
-    'GUÍA DE REMISION',
     'RECIBO POR HONORARIOS',
+    'OTROS',
   ];
 
   /*   String get fechaSQL =>
