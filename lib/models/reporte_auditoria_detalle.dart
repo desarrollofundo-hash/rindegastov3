@@ -1,0 +1,205 @@
+import 'package:flu2/models/reporte_model.dart';
+
+class ReporteAuditoriaDetalle {
+  final int id;
+  final int idAd;
+  final int idInf;
+  final int idInfDet;
+  final int idRend;
+  final int idUser;
+  final String? obs;
+  final String? estadoActual;
+  final String? estado;
+  final String? fecCre;
+
+  // Campos adicionales del JSON (tabla gasto)
+  final String? politica;
+  final String? categoria;
+  final String? tipoGasto;
+  final String? ruc;
+  final String? proveedor;
+  final String? tipoComprobante;
+  final String? serie;
+  final String? numero;
+  final double igv;
+  final String? fecha;
+  final double total;
+  final String? moneda;
+  final String? rucCliente;
+  final String? motivoViaje;
+  final String? lugarOrigen;
+  final String? lugarDestino;
+  final String? tipoMovilidad;
+  final int idRev;
+  final String? consumidor;
+  final String? placa;
+
+  ReporteAuditoriaDetalle({
+    required this.id,
+    required this.idAd,
+    required this.idInf,
+    required this.idInfDet,
+    required this.idRend,
+    required this.idUser,
+    this.obs,
+    this.estadoActual,
+    this.estado,
+    this.fecCre,
+    this.politica,
+    this.categoria,
+    this.tipoGasto,
+    this.ruc,
+    this.proveedor,
+    this.tipoComprobante,
+    this.serie,
+    this.numero,
+    required this.igv,
+    this.fecha,
+    required this.total,
+    this.moneda,
+    this.rucCliente,
+    this.motivoViaje,
+    this.lugarOrigen,
+    this.lugarDestino,
+    this.tipoMovilidad,
+    required this.idRev,
+    this.consumidor,
+    this.placa,
+  });
+
+  factory ReporteAuditoriaDetalle.fromJson(Map<String, dynamic> json) {
+    return ReporteAuditoriaDetalle(
+      id: json['id'] ?? 0,
+      idAd: json['idad'] ?? 0,
+      idInf: json['idinf'] ?? 0,
+      idInfDet: json['idinfdet'] ?? 0,
+      idRend: json['idrend'] ?? 0,
+      idUser: json['iduser'] ?? 0,
+      obs: json['obs'],
+      estadoActual: json['estadoactual'],
+      estado: json['estado'],
+      fecCre: json['feccre'],
+      politica: json['politica'],
+      categoria: json['categoria'],
+      tipoGasto: json['tipogasto'],
+      ruc: json['ruc'],
+      proveedor: json['proveedor'],
+      tipoComprobante: json['tipocombrobante'],
+      serie: json['serie'],
+      numero: json['numero'],
+      igv: (json['igv'] ?? 0.0).toDouble(),
+      fecha: json['fecha'],
+      total: (json['total'] ?? 0.0).toDouble(),
+      moneda: json['moneda'],
+      rucCliente: json['ruccliente'],
+      motivoViaje: json['motivoviaje'],
+      lugarOrigen: json['lugarorigen'],
+      lugarDestino: json['lugardestino'],
+      tipoMovilidad: json['tipomovilidad'],
+      idRev: json['idrev'] ?? 0,
+      consumidor: json['consumidor'],
+      placa: json['placa'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'idad': idAd,
+      'idinf': idInf,
+      'idinfdet': idInfDet,
+      'idrend': idRend,
+      'iduser': idUser,
+      'obs': obs,
+      'estadoactual': estadoActual,
+      'estado': estado,
+      'feccre': fecCre,
+      'politica': politica,
+      'categoria': categoria,
+      'tipogasto': tipoGasto,
+      'ruc': ruc,
+      'proveedor': proveedor,
+      'tipocombrobante': tipoComprobante,
+      'serie': serie,
+      'numero': numero,
+      'igv': igv,
+      'fecha': fecha,
+      'total': total,
+      'moneda': moneda,
+      'ruccliente': rucCliente,
+      'motivoviaje': motivoViaje,
+      'lugarorigen': lugarOrigen,
+      'lugardestino': lugarDestino,
+      'tipomovilidad': tipoMovilidad,
+      'idrev': idRev,
+      'consumidor': consumidor,
+      'placa': placa,
+    };
+  }
+
+  Reporte toReporte() {
+    return Reporte(
+      idrend: idRend,
+      iduser: idUser,
+      dni: null, // Puedes asignar valores por defecto o lo que corresponda
+      politica: politica,
+      categoria: categoria,
+      tipogasto: tipoGasto,
+      ruc: ruc,
+      proveedor: proveedor,
+      tipocomprobante: tipoComprobante,
+      serie: serie,
+      numero: numero,
+      igv: igv,
+      fecha: fecha,
+      total: total,
+      moneda: moneda,
+      ruccliente: rucCliente,
+      desempr: null, // Asigna valores como correspondan
+      dessed: null, // Asigna valores como correspondan
+      gerencia: null, // Asigna valores como correspondan
+      area: null, // Asigna valores como correspondan
+      idcuenta: null, // Asigna valores como correspondan
+      consumidor: consumidor, // Asigna valores como correspondan
+      placa: placa, // Asigna valores como correspondan
+      estadoActual: estadoActual,
+      glosa: null, // Asigna valores como correspondan
+      motivoviaje: motivoViaje,
+      lugarorigen: lugarOrigen,
+      lugardestino: lugarDestino,
+      tipomovilidad: tipoMovilidad,
+      feccre: fecCre,
+      obs: obs,
+      evidencia: null, // Asigna valores como correspondan
+    );
+  }
+
+  // Métodos auxiliares
+  String get estadoFormatted => estadoActual ?? 'Sin estado';
+
+  String get fechaCreacionFormatted {
+    if (fecCre == null || fecCre!.isEmpty) return '----';
+    try {
+      if (fecCre!.contains('T')) {
+        return fecCre!.split('T')[0];
+      }
+      return fecCre!;
+    } catch (_) {
+      return '----';
+    }
+  }
+
+  bool get hasRuc => ruc != null && ruc!.isNotEmpty;
+  bool get hasObs => obs != null && obs!.isNotEmpty;
+
+  String get resumenAuditoria {
+    final rucStr = hasRuc ? 'RUC: $ruc' : 'Sin RUC';
+    final obsStr = hasObs ? obs : 'Sin observaciones';
+    return '$rucStr • $estadoFormatted • $obsStr';
+  }
+
+  @override
+  String toString() {
+    return 'ReporteAuditoriaDetalle(id: $id, idAd: $idAd, idInfDet: $idInfDet, categoria: $categoria, total: $total)';
+  }
+}

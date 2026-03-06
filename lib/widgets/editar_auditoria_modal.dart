@@ -1,0 +1,643 @@
+import 'package:flu2/models/reporte_auditioria_model.dart';
+import 'package:flu2/services/api_service.dart';
+import 'package:flu2/utils/navigation_utils.dart';
+import 'package:flutter/material.dart';
+import '../models/reporte_auditoria_detalle.dart';
+
+class EditarAuditoriaModal extends StatefulWidget {
+  final ReporteAuditoria auditoria;
+  final List<ReporteAuditoriaDetalle> detalles;
+
+  const EditarAuditoriaModal({
+    super.key,
+    required this.auditoria,
+    required this.detalles,
+  });
+
+  @override
+  State<EditarAuditoriaModal> createState() => _EditarAuditoriaModalState();
+}
+
+class _EditarAuditoriaModalState extends State<EditarAuditoriaModal> {
+  String filtroSeleccionado = 'Todos';
+  List<ReporteAuditoriaDetalle> detallesFiltrados = [];
+  Map<int, bool> detallesSeleccionados = {};
+  bool todosMarcados = true;
+
+  late TextEditingController _notaController;
+
+  final ApiService _apiService = ApiService();
+
+  @override
+  void initState() {
+    super.initState();
+    _notaController = TextEditingController();
+    detallesFiltrados = widget.detalles;
+    // Inicializar todos como seleccionados por defecto
+    for (var det in widget.detalles) {
+      detallesSeleccionados[det.idInfDet] = false;
+      todosMarcados = false;
+    }
+  }
+
+  void _toggleTodos() {
+    setState(() {
+      todosMarcados = !todosMarcados;
+      for (var det in detallesFiltrados) {
+        detallesSeleccionados[det.idInfDet] = todosMarcados;
+      }
+    });
+  }
+
+  void _toggleSeleccion(int idDetalle) {
+    setState(() {
+      detallesSeleccionados[idDetalle] =
+          !(detallesSeleccionados[idDetalle] ?? false);
+      todosMarcados = detallesFiltrados.every(
+        (d) => detallesSeleccionados[d.idInfDet] == true,
+      );
+    });
+  }
+
+  int _getSeleccionadosCount() {
+    return detallesSeleccionados.values
+        .where((seleccionado) => seleccionado == true)
+        .length;
+  }
+
+  double _getTotalSeleccionado() {
+    double total = 0.0;
+    for (var gasto in detallesFiltrados) {
+      if (detallesSeleccionados[gasto.idInfDet] == true) {
+        total += gasto.total;
+      }
+    }
+    return total;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF121212) : Colors.white,
+      appBar: AppBar(
+        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDark ? Colors.white : Colors.black,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          'Editar auditoría',
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.close,
+              color: isDark ? Colors.white : Colors.black,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Cabecera con política
+          Container(
+            width: double.infinity,
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.blue.shade50,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+            child: Row(
+              children: [
+                Text(
+                  'Política',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.blue,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  widget.auditoria.politica ?? 'General',
+                  style: TextStyle(
+                    color: isDark ? const Color(0xFFE0E0E0) : Colors.black,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // Título sección
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                Text(
+                  'Detalles',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.blue,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Botón "Todos"
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: _toggleTodos,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: todosMarcados
+                          ? Colors.blue
+                          : (isDark
+                                ? const Color(0xFF2A2A2A)
+                                : Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          todosMarcados ? Icons.check : Icons.remove,
+                          color: todosMarcados
+                              ? Colors.white
+                              : (isDark
+                                    ? const Color(0xFFB0B0B0)
+                                    : Colors.grey.shade600),
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Todos',
+                          style: TextStyle(
+                            color: todosMarcados
+                                ? Colors.white
+                                : (isDark
+                                      ? const Color(0xFFB0B0B0)
+                                      : Colors.grey.shade600),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const Spacer(),
+                // 🔹 Botón RECHAZAR (condicional)
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _getSeleccionadosCount() > 0
+                        ? () {
+                            // Acción solo si hay seleccionados
+                            _mostrarDialogoComentario(context);
+                          }
+                        : null, // 🔸 Desactiva el botón si no hay seleccionados
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _getSeleccionadosCount() > 0
+                          ? Colors.red
+                          : (isDark
+                                ? const Color(0xFF2A2A2A)
+                                : Colors.grey.shade300), // Color según estado
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 1),
+                    ),
+                    child: Text(
+                      'RECHAZAR',
+                      style: TextStyle(
+                        color: _getSeleccionadosCount() > 0
+                            ? Colors.white
+                            : (isDark
+                                  ? const Color(0xFFB0B0B0)
+                                  : Colors.grey.shade600),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Lista de detalles
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: detallesFiltrados.length,
+              itemBuilder: (context, index) {
+                final det = detallesFiltrados[index];
+                final isSelected = detallesSeleccionados[det.idInfDet] ?? false;
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: isSelected
+                          ? Colors.blue
+                          : (isDark
+                                ? const Color(0xFF424242)
+                                : Colors.grey.shade300),
+                      width: isSelected ? 2 : 1,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: InkWell(
+                    onTap: () => _toggleSeleccion(det.idInfDet),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          // Checkbox
+                          Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.blue
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: isSelected
+                                    ? Colors.blue
+                                    : (isDark
+                                          ? const Color(0xFF757575)
+                                          : Colors.grey.shade400),
+                                width: 2,
+                              ),
+                            ),
+                            child: isSelected
+                                ? const Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                    size: 16,
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(width: 12),
+
+                          // Icono documento
+                          Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF2A2A2A)
+                                  : Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.description,
+                              color: isDark
+                                  ? const Color(0xFFB0B0B0)
+                                  : Colors.grey.shade600,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+
+                          // Información principal
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  det.proveedor ?? det.ruc ?? 'SIN RUC',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark
+                                        ? const Color(0xFFE0E0E0)
+                                        : Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  det.categoria ?? 'Sin estado',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isDark
+                                        ? const Color(0xFFB0B0B0)
+                                        : Colors.grey.shade600,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  formatDate(det.fecha),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isDark
+                                        ? const Color(0xFFB0B0B0)
+                                        : Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Estado visual
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '${det.total} PEN',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark
+                                      ? const Color(0xFFE0E0E0)
+                                      : Colors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: getStatusColor(det.estadoActual),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  det.estadoActual ?? 'En revisión',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // Footer
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  spreadRadius: 1,
+                  blurRadius: 4,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                children: [
+                  // Total (por ahora simbólico)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Seleccionados (${_getSeleccionadosCount()})',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? const Color(0xFFE0E0E0)
+                              : Colors.black,
+                        ),
+                      ),
+                      Text(
+                        '${_getTotalSeleccionado().toStringAsFixed(2)} PEN',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Botones
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _mostrarDialogoComentario(BuildContext context) {
+    // Controlador para el cuadro de texto();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        String comentario = '';
+        String error = '';
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('MOTIVO DE RECHAZO'),
+              backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: _notaController,
+                    onChanged: (value) {
+                      setState(() {
+                        comentario = value;
+                        error = ''; // Limpia el error al escribir
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      hintText:
+                          'Ejemplo: la factura 1728 es rechazada porque ...',
+                    ),
+                    maxLines: 4,
+                  ),
+                  if (error.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        error,
+                        style: const TextStyle(color: Colors.red, fontSize: 13),
+                      ),
+                    ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    if (comentario.trim().length < 5) {
+                      setState(() {
+                        error = 'Debe escribir al menos 5 caracteres';
+                      });
+                    } else {
+                      _rechazarAuditoria();
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: const Text('ACEPTAR'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _rechazarAuditoria() async {
+    // Filtrar gastos seleccionados y no seleccionados
+    debugPrint("SECCION ELIMINAR:");
+
+    final gastosSeleccionadosList = detallesFiltrados
+        .where((g) => detallesSeleccionados[g.idInfDet] == true)
+        .toList();
+
+    if (detallesFiltrados.isEmpty) return;
+
+    try {
+      // Mostrar loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+      // 3️⃣ Guardar DETALLES seleccionados (estadoACTUAL = RECHAZADO)
+      debugPrint("INICIO GUARDAR ELIMINAR:");
+      for (final gasto in gastosSeleccionadosList) {
+        final detalleData = {
+          "idAd": gasto.idAd, // Relación con la cabecera
+          "idInf": gasto.idInf,
+          "idInfDet": gasto.idInfDet, // usar idrend como id de factura
+          "idRend": gasto.idRend,
+          // Preferir el idUser del detalle; si no está, usar el del informe
+          "idUser": gasto.idUser,
+          // El modelo de detalle no tiene 'dni', por eso mantenemos el dni del informe
+          "dni": widget.auditoria.dni,
+          // Usar ruc del detalle si existe, si no, el ruc del informe
+          "ruc": (gasto.ruc ?? '').toString(),
+          "obs": _notaController.text,
+          "estadoActual": 'RECHAZADO',
+          "estado": gasto.estado ?? 'S',
+          "fecCre": gasto.fecCre,
+          "useReg": gasto.idUser,
+          "hostname": 'FLUTTER',
+          "fecEdit": DateTime.now().toIso8601String(),
+          "useEdit": gasto.idUser,
+          "useElim": 0,
+        };
+
+        debugPrint("Guardar detalle rechazado:");
+
+        final ok = await _apiService.saveRendicionAuditoriaDetalle(detalleData);
+        if (!ok) {
+          throw Exception(
+            'Error al guardar detalle del gasto ${gasto.idInfDet}',
+          );
+        }
+      }
+
+      // 5️⃣ Cerrar loading
+      if (mounted) Navigator.of(context).pop();
+
+      // 6️⃣ Mostrar mensaje de éxito
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'GASTOS RECHAZADOS (${_getSeleccionadosCount()})',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+
+        // Volver después de 1 seg
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted) Navigator.of(context).pop(true);
+        });
+      }
+    } catch (e) {
+      if (mounted) Navigator.of(context).pop();
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text(
+              'Error al crear/actualizar el informe: ${e.toString()}',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+}
