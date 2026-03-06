@@ -1341,11 +1341,11 @@ class _EditReporteModalState extends State<EditReporteModal> {
               case '08':
                 tipoTexto = 'NOTA DE DEBITO';
                 break;
-              case '09':
-                tipoTexto = 'GUIA DE REMISION';
-                break;
               case '10':
-                tipoTexto = 'RECIBO POR HONORARIOS';
+                tipoTexto = 'RECIBO POR HONORARIO';
+                break;
+              case '11':
+                tipoTexto = 'OTROS';
               default:
                 tipoTexto = 'COMPROBANTE';
             }
@@ -1977,6 +1977,14 @@ class _EditReporteModalState extends State<EditReporteModal> {
                   ? _centroCostoController.text
                   : null,
               items: _centroCosto
+                  .fold<Map<String, DropdownOption>>({}, (map, centro) {
+                    // Eliminar duplicados basándose en el value
+                    if (!map.containsKey(centro.value)) {
+                      map[centro.value] = centro;
+                    }
+                    return map;
+                  })
+                  .values
                   .map(
                     (centro) => DropdownMenuItem<String>(
                       value: centro.value,
@@ -2092,6 +2100,14 @@ class _EditReporteModalState extends State<EditReporteModal> {
                   ? _centroCostoController.text
                   : null,
               items: _centroCosto
+                  .fold<Map<String, DropdownOption>>({}, (map, centro) {
+                    // Eliminar duplicados basándose en el value
+                    if (!map.containsKey(centro.value)) {
+                      map[centro.value] = centro;
+                    }
+                    return map;
+                  })
+                  .values
                   .map(
                     (centro) => DropdownMenuItem<String>(
                       value: centro.value,
