@@ -31,7 +31,7 @@ class ApiService {
 
   // APISERVICE CLIENTE
   ApiService({http.Client? client}) : client = client ?? http.Client();
-  //RENDICION GASTO
+  //RENDICION GASTO // OBTENER LISTADO DE GASTOS
   Future<List<Reporte>> getReportesRendicionGasto({
     required String id,
     required String idrend,
@@ -39,9 +39,9 @@ class ApiService {
     required String ruc,
   }) async {
     /*     debugPrint('🚀 Iniciando petición a API...');
-    debugPrint('📍 URL base: $baseUrl/reporte/rendiciongasto');
-    debugPrint('🏗️ Plataforma: ${Platform.operatingSystem}');
-    debugPrint('🔧 Modo: ${kReleaseMode ? 'Release' : 'Debug'}'); */
+      debugPrint('📍 URL base: $baseUrl/reporte/rendiciongasto');
+      debugPrint('🏗️ Plataforma: ${Platform.operatingSystem}');
+      debugPrint('🔧 Modo: ${kReleaseMode ? 'Release' : 'Debug'}'); */
 
     try {
       // Diagnóstico de conectividad en debug
@@ -51,13 +51,13 @@ class ApiService {
         );
         debugPrint('🔬 Diagnóstico completo: $diagnostic');
         /* 
-        if (!diagnostic['internetConnection']) {
-          throw Exception('❌ Sin conexión a internet');
-        }
+          if (!diagnostic['internetConnection']) {
+            throw Exception('❌ Sin conexión a internet');
+          }
 
-        if (!diagnostic['serverReachable']) {
-          throw Exception('❌ No se puede alcanzar el servidor $baseUrl');
-        } */
+          if (!diagnostic['serverReachable']) {
+            throw Exception('❌ No se puede alcanzar el servidor $baseUrl');
+          } */
       }
 
       // Construir la URL con los parámetros dinámicos
@@ -70,9 +70,9 @@ class ApiService {
       print('📍 URL: $uri');
       print('========================================');
       /* 
-      debugPrint('📡 Realizando petición HTTP GET...');
-      debugPrint('🌍 URL final: $uri');
- */
+        debugPrint('📡 Realizando petición HTTP GET...');
+        debugPrint('🌍 URL final: $uri');
+  */
       final response = await client
           .get(
             uri,
@@ -86,9 +86,9 @@ class ApiService {
           )
           .timeout(timeout);
       /* 
-      debugPrint('📊 Respuesta recibida - Status: ${response.statusCode}');
-      debugPrint('📦 Headers: ${response.headers}');
-      debugPrint('📏 Tamaño de respuesta: ${response.body.length} bytes'); */
+        debugPrint('📊 Respuesta recibida - Status: ${response.statusCode}');
+        debugPrint('📦 Headers: ${response.headers}');
+        debugPrint('📏 Tamaño de respuesta: ${response.body.length} bytes'); */
 
       if (response.statusCode == 200) {
         debugPrint('✅ Status 200 - Procesando JSON...');
@@ -111,8 +111,8 @@ class ApiService {
         try {
           final List<dynamic> jsonData = json.decode(response.body);
           /*   debugPrint(
-            '🎯 JSON parseado correctamente. Items: ${jsonData.length}',
-          ); */
+              '🎯 JSON parseado correctamente. Items: ${jsonData.length}',
+            ); */
 
           if (jsonData.isEmpty) {
             debugPrint('⚠️ La API devolvió una lista vacía');
@@ -141,7 +141,7 @@ class ApiService {
             } catch (e) {
               errores++;
               /*               debugPrint('⚠️ Error al parsear item $i: $e');
- */
+  */
               if (errores < 5) {
                 debugPrint('📄 JSON problemático: ${jsonData[i]}');
               }
@@ -150,12 +150,12 @@ class ApiService {
 
           if (errores > 0) {
             /*             debugPrint('⚠️ Se encontraron $errores errores de parsing');
- */
+  */
           }
 
           /*    debugPrint(
-            '✅ ${reportes.length} reportes procesados correctamente ($errores errores)',
-          ); */
+              '✅ ${reportes.length} reportes procesados correctamente ($errores errores)',
+            ); */
           return reportes;
         } catch (e) {
           debugPrint('❌ Error al parsear JSON: $e');
@@ -205,12 +205,12 @@ class ApiService {
         'Sin conexión al servidor. Verifica tu conexión a internet y que el servidor esté disponible.',
       );
     } /*   catch (e) {
-      debugPrint('💥 Error no manejado: $e');
-      throw Exception('Error inesperado: $e');
-    } */
+        debugPrint('💥 Error no manejado: $e');
+        throw Exception('Error inesperado: $e');
+      } */
   }
 
-  //RENDICION INFORME
+  //RENDICION INFORME OBTENER LISTADO DE INFORMES
   Future<List<ReporteInforme>> getReportesRendicionInforme({
     required String id,
     required String idrend,
@@ -1202,6 +1202,107 @@ class ApiService {
     return await getDropdownOptionsPolitica('usuarios');
   }
 
+/// Obtener tipos de gasto
+  Future<List<DropdownOption>> getTiposGasto() async {
+    debugPrint('🚀 Obteniendo tipos de gasto...');
+    debugPrint('📍 URL: $baseUrl/maestros/rendicion_tipogasto');
+
+    try {
+      // Diagnóstico de conectividad en modo debug
+      if (!kReleaseMode) {
+        final diagnostic = await ConnectivityHelper.fullConnectivityDiagnostic(
+          baseUrl,
+        );
+        if (!diagnostic['internetConnection']) {
+          throw Exception('❌ Sin conexión a internet');
+        }
+        if (!diagnostic['serverReachable']) {
+          throw Exception('❌ No se puede alcanzar el servidor $baseUrl');
+        }
+      }
+
+      final response = await client
+          .get(
+            Uri.parse('$baseUrl/maestros/rendicion_tipogasto'),
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json; charset=UTF-8',
+              'User-Agent': 'Flutter-App/${Platform.operatingSystem}',
+              'Connection': 'keep-alive',
+              'Cache-Control': 'no-cache',
+            },
+          )
+          .timeout(timeout);
+
+      debugPrint(
+        '📊 Respuesta tipos de gasto - Status: ${response.statusCode}',
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint('✅ Status 200 - Procesando tipos de gasto...');
+
+        if (response.body.isEmpty) {
+          throw Exception('⚠️ Respuesta vacía del servidor');
+        }
+
+        try {
+          final jsonData = json.decode(response.body);
+          debugPrint('📄 JSON tipos de gasto decodificado: $jsonData');
+
+          if (jsonData is! List) {
+            throw Exception(
+              '❌ Formato de respuesta inesperado para tipos de gasto',
+            );
+          }
+
+          // Convertir cada item a DropdownOption
+          final List<DropdownOption> tiposGasto = [];
+          for (final item in jsonData) {
+            if (item is Map<String, dynamic>) {
+              // Verificar que el estado sea activo
+              final estado = item['estado']?.toString() ?? '';
+              if (estado.toLowerCase() == 's') {
+                final tipogasto = item['tipogasto']?.toString() ?? '';
+                final id = item['id']?.toString() ?? '';
+
+                if (tipogasto.isNotEmpty) {
+                  tiposGasto.add(DropdownOption(id: id, value: tipogasto));
+                }
+              }
+            }
+          }
+
+          debugPrint(
+            '✅ ${tiposGasto.length} tipos de gasto activos encontrados',
+          );
+          return tiposGasto;
+        } catch (e) {
+          debugPrint('❌ Error al parsear JSON de tipos de gasto: $e');
+          throw Exception('Error al procesar respuesta del servidor: $e');
+        }
+      } else {
+        debugPrint('❌ Status ${response.statusCode}');
+        throw Exception(
+          'Error del servidor (${response.statusCode}): ${response.reasonPhrase}',
+        );
+      }
+    } on SocketException catch (e) {
+      debugPrint('🔌 Error de conexión en tipos de gasto: $e');
+      throw Exception(
+        'Sin conexión al servidor. Verifica tu conexión a internet.',
+      );
+    } on HttpException catch (e) {
+      debugPrint('🌐 Error HTTP en tipos de gasto: $e');
+      throw Exception('Error de protocolo HTTP: $e');
+    } on FormatException catch (e) {
+      debugPrint('📝 Error de formato en tipos de gasto: $e');
+      throw Exception('El servidor devolvió datos en formato incorrecto');
+    } catch (e) {
+      debugPrint('💥 Error no manejado en tipos de gasto: $e');
+      throw Exception('Error inesperado: $e');
+    }
+  }
+
   /// ==================== ENDPOINTS ESPECÍFICOS DE RENDICIÓN ====================
 
   /// Obtener políticas de rendición
@@ -1512,107 +1613,7 @@ class ApiService {
     }
   }
 
-  /// Obtener tipos de gasto
-  Future<List<DropdownOption>> getTiposGasto() async {
-    debugPrint('🚀 Obteniendo tipos de gasto...');
-    debugPrint('📍 URL: $baseUrl/maestros/rendicion_tipogasto');
-
-    try {
-      // Diagnóstico de conectividad en modo debug
-      if (!kReleaseMode) {
-        final diagnostic = await ConnectivityHelper.fullConnectivityDiagnostic(
-          baseUrl,
-        );
-        if (!diagnostic['internetConnection']) {
-          throw Exception('❌ Sin conexión a internet');
-        }
-        if (!diagnostic['serverReachable']) {
-          throw Exception('❌ No se puede alcanzar el servidor $baseUrl');
-        }
-      }
-
-      final response = await client
-          .get(
-            Uri.parse('$baseUrl/maestros/rendicion_tipogasto'),
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json; charset=UTF-8',
-              'User-Agent': 'Flutter-App/${Platform.operatingSystem}',
-              'Connection': 'keep-alive',
-              'Cache-Control': 'no-cache',
-            },
-          )
-          .timeout(timeout);
-
-      debugPrint(
-        '📊 Respuesta tipos de gasto - Status: ${response.statusCode}',
-      );
-
-      if (response.statusCode == 200) {
-        debugPrint('✅ Status 200 - Procesando tipos de gasto...');
-
-        if (response.body.isEmpty) {
-          throw Exception('⚠️ Respuesta vacía del servidor');
-        }
-
-        try {
-          final jsonData = json.decode(response.body);
-          debugPrint('📄 JSON tipos de gasto decodificado: $jsonData');
-
-          if (jsonData is! List) {
-            throw Exception(
-              '❌ Formato de respuesta inesperado para tipos de gasto',
-            );
-          }
-
-          // Convertir cada item a DropdownOption
-          final List<DropdownOption> tiposGasto = [];
-          for (final item in jsonData) {
-            if (item is Map<String, dynamic>) {
-              // Verificar que el estado sea activo
-              final estado = item['estado']?.toString() ?? '';
-              if (estado.toLowerCase() == 's') {
-                final tipogasto = item['tipogasto']?.toString() ?? '';
-                final id = item['id']?.toString() ?? '';
-
-                if (tipogasto.isNotEmpty) {
-                  tiposGasto.add(DropdownOption(id: id, value: tipogasto));
-                }
-              }
-            }
-          }
-
-          debugPrint(
-            '✅ ${tiposGasto.length} tipos de gasto activos encontrados',
-          );
-          return tiposGasto;
-        } catch (e) {
-          debugPrint('❌ Error al parsear JSON de tipos de gasto: $e');
-          throw Exception('Error al procesar respuesta del servidor: $e');
-        }
-      } else {
-        debugPrint('❌ Status ${response.statusCode}');
-        throw Exception(
-          'Error del servidor (${response.statusCode}): ${response.reasonPhrase}',
-        );
-      }
-    } on SocketException catch (e) {
-      debugPrint('🔌 Error de conexión en tipos de gasto: $e');
-      throw Exception(
-        'Sin conexión al servidor. Verifica tu conexión a internet.',
-      );
-    } on HttpException catch (e) {
-      debugPrint('🌐 Error HTTP en tipos de gasto: $e');
-      throw Exception('Error de protocolo HTTP: $e');
-    } on FormatException catch (e) {
-      debugPrint('📝 Error de formato en tipos de gasto: $e');
-      throw Exception('El servidor devolvió datos en formato incorrecto');
-    } catch (e) {
-      debugPrint('💥 Error no manejado en tipos de gasto: $e');
-      throw Exception('Error inesperado: $e');
-    }
-  }
-
+  
   /// Obtener tipos movilidad
   Future<List<DropdownOption>> getTiposMovilidad() async {
     debugPrint('🚀 Obteniendo tipos movilidad...');
@@ -2664,7 +2665,7 @@ class ApiService {
 
   //-------------------SAVE RENDICION INFORME------------------------//
   /// [informeData] - Map con los datos del informe a guardar
-  /// SAVE RENDICION INFORME - GUARDAR INFORME RENDICION
+  /// SAVE RENDICION INFORME - GUARDAR INFORME RENDICION -DETALLE INFORME RENDICION
   Future<int?> saveRendicionInforme(Map<String, dynamic> informeData) async {
     debugPrint('🚀 Guardando informe de rendición...');
     debugPrint('📍 URL: $baseUrl/saveupdate/saverendicioninforme');
@@ -2869,7 +2870,7 @@ class ApiService {
     }
   }
 
-  //-------------------UPDATE RENDICION INFORME DETALLE------------------------//
+  //-------------------UPDATE RENDICION GASTO DETALLE------------------------//
   Future<bool> saveupdateRendicionGasto(
     Map<String, dynamic> informeDetalleData,
   ) async {
