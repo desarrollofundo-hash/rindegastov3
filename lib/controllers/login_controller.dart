@@ -64,7 +64,7 @@ class LoginController extends ChangeNotifier {
       );
 
       // ✅ Validar versión de la app
-      const String versionActualApp = "v.01.01";
+      const String versionActualApp = "v.01.02";
       final String? versionServidor = userData['versionactual'];
 
       if (versionServidor != null && versionServidor != versionActualApp) {
