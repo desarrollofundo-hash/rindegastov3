@@ -140,39 +140,39 @@ String formatDate(String? fecha) {
 }
 
 int diferenciaEnDias(String fecha1, String fecha2) {
-  DateTime? parseDate(String fecha) {
-    try {
-      DateTime? dateTime;
+  DateTime? parseDate(String? fecha) {
+    final String normalized = fecha?.trim() ?? '';
+    if (normalized.isEmpty || normalized.toLowerCase() == 'null') {
+      return null;
+    }
 
-      // Formato ISO: 2025-10-04T00:00:00
-      if (fecha.contains('T')) {
-        dateTime = DateTime.tryParse(fecha);
+    try {
+      final DateTime? isoDate = DateTime.tryParse(normalized);
+      if (isoDate != null) {
+        return isoDate;
       }
+
       // Formato dd/MM/yyyy
-      else if (fecha.contains('/')) {
-        final parts = fecha.split('/');
+      if (normalized.contains('/')) {
+        final parts = normalized.split('/');
         if (parts.length == 3) {
-          dateTime = DateTime.tryParse(
+          return DateTime.tryParse(
             '${parts[2]}-${parts[1].padLeft(2, '0')}-${parts[0].padLeft(2, '0')}',
           );
         }
       }
-      // Formato yyyy-MM-dd
-      else if (fecha.contains('-')) {
-        dateTime = DateTime.tryParse(fecha);
-      }
-
-      return dateTime;
     } catch (_) {
       return null;
     }
+
+    return null;
   }
 
   final DateTime? d1 = parseDate(fecha1);
   final DateTime? d2 = parseDate(fecha2);
 
   if (d1 == null || d2 == null) {
-    throw FormatException('Una o ambas fechas no tienen un formato válido');
+    return 0;
   }
 
   // Calcula la diferencia en días (valor absoluto)

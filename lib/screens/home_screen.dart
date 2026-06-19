@@ -381,6 +381,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       }
     }
   }
+
+
+
   // ========== MÉTODOS REUTILIZABLES ==========
 
   void _mostrarEditarPerfil(BuildContext context) {
